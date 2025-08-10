@@ -75,21 +75,9 @@ A sample dataset is included in this repository as sample_customers.csv.
 You can use it to test the application before uploading your own data.
 
 ## Project Structure
-php
 
-customer-segmentation-dbscan/
-│── app.py                  # Flask backend
-│── model/
-│     └── clustering.py     # DBSCAN logic
-│── templates/
-│     ├── index.html        # File upload page
-│     └── result.html       # Results page with visualization
-│── static/
-│     └── style.css         # Custom CSS styles
-│── uploads/                # Uploaded CSV files
-│── sample_customers.csv    # Example dataset
-│── requirements.txt        # Python dependencies
-│── README.md               # Project documentation
+
+![alt text](image-3.png)
 
 ## INPUT
 
