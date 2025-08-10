@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Segmentation Result</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <main class="container">
+      <section class="result-hero">
+        <div class="result-header">
+          <h1>Segmentation Result</h1>
+          <div class="sub">params: eps = {{ params.eps }}, min_samples = {{ params.min_samples }}</div>
+        </div>
+
+        <div class="result-grid">
+          <div class="card chart-card">
+            <canvas id="clusterChart" height="400"></canvas>
+          </div>
+
+          <div class="card summary-card">
+            <h3>Cluster Summary</h3>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Cluster</th>
+                  <th>Size</th>
+                  {% for k in summary[0].keys() if k.startswith('mean_') %}
+                  <th>{{ k.replace('mean_','') }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in summary %}
+                <tr>
+                  <td>{{ row.cluster }}</td>
+                  <td>{{ row.size }}</td>
+                  {% for k, v in row.items() if k.startswith('mean_') %}
+                  <td>{{ v }}</td>
+                  {% endfor %}
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+
+            <h4>Preview</h4>
+            <div class="preview-table">{{ raw_preview | safe }}</div>
+            <a href="{{ url_for('index') }}" class="btn small">Analyze another file</a>
+          </div>
+        </div>
+
+        <div class="insight card">
+          <h3>Quick Insights</h3>
+          <ul>
+            <li>Cluster label <code>-1</code> indicates noise / outliers — uncommon customers.</li>
+            <li>Use the summary table to identify high-value clusters (higher mean TotalSpend).</li>
+            <li>Adjust <code>eps</code> and <code>min_samples</code> on upload to tune sensitivity.</li>
+          </ul>
+        </div>
+
+      </section>
+      <footer>
+        <small>Download or copy the table from above for campaign planning.</small>
+      </footer>
+    </main>
+
+    <script>
+      // prepare data passed from Flask
+      const clusters = {{ clusters_json | safe }};
+      // build Chart.js datasets per cluster
+      const palettes = [
+        'rgb(99,102,241)','rgb(16,185,129)','rgb(239,68,68)','rgb(234,179,8)',
+        'rgb(37,99,235)','rgb(236,72,153)','rgb(20,184,166)','rgb(119,52,169)'
+      ];
+
+      const datasets = clusters.map((c, idx) => {
+        const color = palettes[idx % palettes.length];
+        return {
+          label: `Cluster ${c.label} (n=${c.size})`,
+          data: c.points.map(p => ({x: p.x, y: p.y, id: p.id, hover: `ID: ${p.id}\nSpend: ${p.total_spend}\nVisit: ${p.visit_freq}`})),
+          backgroundColor: color,
+          pointRadius: c.label === "-1" || c.label === -1 ? 4 : 6,
+          pointHoverRadius: 8,
+        };
+      });
+
+      const ctx = document.getElementById('clusterChart').getContext('2d');
+      const scatter = new Chart(ctx, {
+        type: 'scatter',
+        data: { datasets },
+        options: {
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const p = context.raw;
+                  return p.hover.split('\n');
+                }
+              }
+            },
+            legend: { position: 'top' }
+          },
+          scales: {
+            x: { title: { display: true, text: 'Component 1' } },
+            y: { title: { display: true, text: 'Component 2' } }
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

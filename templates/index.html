@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Customer Segmentation - DBSCAN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <main class="container">
+      <section class="hero">
+        <div class="left">
+          <h1>Customer Segmentation</h1>
+          <p class="lead">Upload customer purchase stats (CSV). DBSCAN will find natural customer groups — no need to predefine number of clusters.</p>
+          <form method="POST" enctype="multipart/form-data" class="upload-form">
+            <label class="file-drop" id="file-drop">
+              <input type="file" name="file" accept=".csv" required>
+              <div>
+                <strong>Choose CSV</strong>
+                <div class="muted">Columns suggested: CustomerID, TotalSpend, VisitFrequency, CategoriesBought</div>
+              </div>
+            </label>
+
+            <div class="params">
+              <label>eps (neighborhood radius)
+                <input type="number" name="eps" step="0.1" value="0.5" min="0.1" max="5">
+              </label>
+              <label>min_samples
+                <input type="number" name="min_samples" step="1" value="5" min="1" max="50">
+              </label>
+            </div>
+
+            <button class="btn">Upload & Analyze</button>
+          </form>
+          <div class="note">Tip: If many points are labeled <em>-1</em> (noise), try increasing eps or decreasing min_samples.</div>
+        </div>
+
+        <div class="right">
+          <div class="card preview">
+            <h3>Example CSV (first rows)</h3>
+            <pre>CustomerID,TotalSpend,VisitFrequency,CategoriesBought
+C001,1200,20,5
+C002,90,2,1
+C003,450,6,3
+C004,3200,40,8</pre>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <small>Built with Flask • DBSCAN • PCA projection • Chart.js</small>
+      </footer>
+    </main>
+
+    <script>
+      // small UI improvement for drag/drop aesthetics (but not full drag-drop upload)
+      const fileDrop = document.getElementById('file-drop');
+      fileDrop.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fileDrop.classList.add('hover');
+      });
+      fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('hover'));
+    </script>
+  </body>
+</html>
